@@ -8,6 +8,7 @@ __azurite_db*
 .funcignore
 Azurite*
 .vscode
+*.zip
 
 *.user
 *.suo
