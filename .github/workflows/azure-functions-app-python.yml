@@ -23,9 +23,10 @@ on:
     branches: ["dev"]
 
 env:
-  AZURE_FUNCTIONAPP_NAME: 'your-app-name'   # set this to your function app name on Azure
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'       # set this to the path to your function app project, defaults to the repository root
-  PYTHON_VERSION: '3.9'                     # set this to the python version to use (e.g. '3.6', '3.7', '3.8')
+#   AZURE_FUNCTIONAPP_NAME: 'your-app-name'   # set this to your function app name on Azure
+#   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'       # set this to the path to your function app project, defaults to the repository root
+  PYTHON_VERSION: '3.10'                     # set this to the python version to use (e.g. '3.6', '3.7', '3.8')
+  
 
 jobs:
   build-and-deploy:
@@ -49,14 +50,13 @@ jobs:
     - name: 'Resolve Project Dependencies Using Pip'
       shell: bash
       run: |
-        # pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         python -m pip install --upgrade pip
         pip install -r requirements.txt --target=".python_packages/lib/site-packages"
         zip function_app.zip function_app.py function.json host.json
         az login --service-principal \
-          --username ${{ env.AZURE_APP_ID }} \
+          --username ${{ vars.AZURE_APP_ID }} \
           --password ${{ secrets.AZURE_APP_SECRET }} \
-          --tenant ${{ env.AZURE_TENANT_ID }}
+          --tenant ${{ vars.AZURE_TENANT_ID }}
         az functionapp deployment source config-zip --build-remote false -g $RG -n $FUNCTION_APP_NAME --src function_app.zip
         # popd
 
