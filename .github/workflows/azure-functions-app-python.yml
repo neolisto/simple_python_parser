@@ -57,8 +57,7 @@ jobs:
           --username ${{ vars.AZURE_APP_ID }} \
           --password ${{ secrets.AZURE_APP_SECRET }} \
           --tenant ${{ vars.AZURE_TENANT_ID }}
-        az functionapp deployment source config-zip --build-remote false -g $RG -n $FUNCTION_APP_NAME --src function_app.zip
-        # popd
+        az functionapp deployment source config-zip --build-remote false -g ${{ vars.AZURE_FUNC_APP_RG}} -n ${{ vars.AZURE_FUNC_APP_NAME}} --src function_app.zip
 
     # - name: 'Run Azure Functions Action'
     #   uses: Azure/functions-action@v1
