@@ -2,26 +2,12 @@
   "scriptFile": "function_app.py",
   "bindings": [
     {
-      "authLevel": "anonymous",
-      "type": "httpTrigger",
+      "name": "myTimer",
+      "type": "timerTrigger",
       "direction": "in",
-      "name": "req",
-      "methods": [
-        "get",
-        "post"
-      ]
-    },
-    {
-      "type": "http",
-      "direction": "out",
-      "name": "$return"
-    },
-    {
-      "type": "queue",
-      "direction": "out",
-      "name": "msg",
-      "queueName": "outqueue",
-      "connection": "AzureStorageQueuesConnectionString"
+      "schedule": "*/15  * * * * *",
+      "runOnStartup": false,
+      "useMonitor": true
     }
   ]
 }

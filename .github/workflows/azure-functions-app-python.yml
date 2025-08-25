@@ -55,7 +55,7 @@ jobs:
         zip function_app.zip function_app.py function.json host.json
         az login --service-principal \
           --username ${{ env.AZURE_APP_ID }} \
-          --password ${{ env.AZURE_APP_SECRET }} \
+          --password ${{ secrets.AZURE_APP_SECRET }} \
           --tenant ${{ env.AZURE_TENANT_ID }}
         az functionapp deployment source config-zip --build-remote false -g $RG -n $FUNCTION_APP_NAME --src function_app.zip
         # popd
