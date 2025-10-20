@@ -39,7 +39,8 @@ jobs:
         continue-on-error: true
       
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v6
+        # Pinned to specific commit SHA for security (v6.0.0)
+        uses: SonarSource/sonarqube-scan-action@689fb39b34b9aa95ebc5f8f119343ddd51542402 # v6.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
