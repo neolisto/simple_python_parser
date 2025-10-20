@@ -48,7 +48,7 @@ jobs:
       
       - name: Wait for Quality Gate Result
         id: quality_gate
-        uses: SonarSource/sonarqube-quality-gate-action@master
+        uses: SonarSource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -63,7 +63,7 @@ jobs:
       
       - name: Send email notification on success
         if: success()
-        uses: dawidd6/action-send-mail@v3
+        uses: dawidd6/action-send-mail@6d98ae34d733f9a723a9e04e94f2f24ba05e1402
         with:
           server_address: smtp.gmail.com
           server_port: 465
@@ -89,7 +89,7 @@ jobs:
       
       - name: Send email notification on failure
         if: failure()
-        uses: dawidd6/action-send-mail@v3
+        uses: dawidd6/action-send-mail@6d98ae34d733f9a723a9e04e94f2f24ba05e1402
         with:
           server_address: smtp.gmail.com
           server_port: 465
