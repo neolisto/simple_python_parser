@@ -29,6 +29,9 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     environment: dev
+    permissions:
+      contents: read
+      packages: write  # Required to publish to GitHub Packages
     steps:
     - name: 'Checkout GitHub Action'
       uses: actions/checkout@v4
@@ -68,3 +71,42 @@ jobs:
         name: function-app-package-${{ github.sha }}
         path: function_app_${{ github.ref_name }}.zip
         retention-days: 90
+    
+    - name: 'Setup Node.js for package publishing'
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        registry-url: 'https://npm.pkg.github.com'
+        scope: '@${{ github.repository_owner }}'
+    
+    - name: 'Create and publish npm package'
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Create package directory
+        mkdir -p package-temp
+        cp function_app_${{ github.ref_name }}.zip package-temp/
+        cd package-temp
+        
+        # Generate package.json
+        VERSION="1.0.$(date +%Y%m%d%H%M%S)"
+        cat > package.json <<EOF
+        {
+          "name": "@${{ github.repository_owner }}/simple-python-parser-function",
+          "version": "${VERSION}",
+          "description": "Azure Function App package for Simple Python Parser",
+          "main": "function_app_${{ github.ref_name }}.zip",
+          "repository": {
+            "type": "git",
+            "url": "https://github.com/${{ github.repository }}.git"
+          },
+          "author": "${{ github.actor }}",
+          "license": "MIT"
+        }
+        EOF
+        
+        # Publish to GitHub Packages
+        npm publish
+        
+        echo "📦 Package published: @${{ github.repository_owner }}/simple-python-parser-function@${VERSION}"
+        echo "View at: https://github.com/${{ github.repository }}/packages"
