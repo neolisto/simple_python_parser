@@ -21,6 +21,8 @@ name: Create ZIP and Deploy Python project to Azure Function App
 on:
   push:
     branches: ["main", "dev"]
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.0
 
 env:
   PYTHON_VERSION: '3.10'                     # set this to the python version to use (e.g. '3.6', '3.7', '3.8')
@@ -30,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     permissions:
-      contents: read
+      contents: write  # Required to create GitHub releases
       packages: write  # Required to publish to GitHub Packages
     steps:
     - name: 'Checkout GitHub Action'
@@ -54,6 +56,7 @@ jobs:
             .python_packages/lib/site-packages/*
 
     - name: 'Deploy ZIP file to Azure Function App'
+      if: ${{ !startsWith(github.ref, 'refs/tags/') }}  # Only deploy on branch pushes, not tags
       shell: bash
       run: |
         az login --service-principal \
@@ -110,3 +113,41 @@ jobs:
         
         echo "📦 Package published: @${{ github.repository_owner }}/simple-python-parser-function@${VERSION}"
         echo "View at: https://github.com/${{ github.repository }}/packages"
+    
+    - name: 'Create GitHub Release with ZIP'
+      if: startsWith(github.ref, 'refs/tags/')  # Only run when a tag is pushed
+      uses: softprops/action-gh-release@v1
+      with:
+        files: function_app_${{ github.ref_name }}.zip
+        body: |
+          ## Azure Function App Package - ${{ github.ref_name }}
+          
+          📦 **Package:** `function_app_${{ github.ref_name }}.zip`
+          🐍 **Python Version:** ${{ env.PYTHON_VERSION }}
+          📅 **Build Date:** ${{ github.event.head_commit.timestamp }}
+          🔖 **Commit:** ${{ github.sha }}
+          
+          ### 📥 Download Options
+          
+          **Option 1: Direct ZIP Download (Recommended)**
+          - Download the attached `function_app_${{ github.ref_name }}.zip` file below
+          
+          **Option 2: npm Package**
+          ```bash
+          npm install @${{ github.repository_owner }}/simple-python-parser-function
+          ```
+          
+          ### 🚀 Deployment
+          
+          Deploy to Azure Functions using:
+          ```bash
+          az functionapp deployment source config-zip \
+            -g <resource-group> \
+            -n <function-app-name> \
+            --src function_app_${{ github.ref_name }}.zip
+          ```
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
