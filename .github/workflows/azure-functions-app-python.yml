@@ -21,6 +21,8 @@ name: Create ZIP and Deploy Python project to Azure Function App
 on:
   push:
     branches: ["main", "dev"]
+     tags:
+      - 'v*.*.*'
 
 env:
   PYTHON_VERSION: '3.10'                     # set this to the python version to use (e.g. '3.6', '3.7', '3.8')
