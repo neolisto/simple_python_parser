@@ -50,38 +50,6 @@ jobs:
             requirements.txt \
             .python_packages/lib/site-packages/*
 
-    - name: 'Generate release notes'
-      id: release_notes
-      run: |
-        echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
-        echo "## Azure Function App Package" >> $GITHUB_OUTPUT
-        echo "" >> $GITHUB_OUTPUT
-        echo "📦 **Package:** function_app_${{ github.ref_name }}.zip" >> $GITHUB_OUTPUT
-        echo "🐍 **Python Version:** ${{ env.PYTHON_VERSION }}" >> $GITHUB_OUTPUT
-        echo "📅 **Build Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
-        echo "🔖 **Git Commit:** ${{ github.sha }}" >> $GITHUB_OUTPUT
-        echo "" >> $GITHUB_OUTPUT
-        echo "### Installation" >> $GITHUB_OUTPUT
-        echo "Download the ZIP file and deploy to Azure Functions using:" >> $GITHUB_OUTPUT
-        echo '```bash' >> $GITHUB_OUTPUT
-        echo "az functionapp deployment source config-zip \\" >> $GITHUB_OUTPUT
-        echo "  -g <resource-group> \\" >> $GITHUB_OUTPUT
-        echo "  -n <function-app-name> \\" >> $GITHUB_OUTPUT
-        echo "  --src function_app_${{ github.ref_name }}.zip" >> $GITHUB_OUTPUT
-        echo '```' >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
-
-    - name: 'Create GitHub Release'
-      uses: softprops/action-gh-release@v1
-      with:
-        files: function_app_${{ github.ref_name }}.zip
-        body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
-        draft: false
-        prerelease: false
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
     - name: 'Deploy ZIP file to Azure Function App'
       shell: bash
       run: |
