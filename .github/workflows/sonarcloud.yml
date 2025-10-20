@@ -46,6 +46,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       
+      - name: Wait for Quality Gate Result
+        id: quality_gate
+        uses: SonarSource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: false  # This ensures the workflow fails if quality gate fails
+      
+      - name: Quality Gate Status Check
+        if: steps.quality_gate.outputs.quality-gate-status == 'FAILED'
+        run: |
+          echo "::error::Quality Gate failed! The code does not meet the required quality standards."
+          echo "Quality Gate Status: ${{ steps.quality_gate.outputs.quality-gate-status }}"
+          exit 1
+      
       - name: Send email notification on success
         if: success()
         uses: dawidd6/action-send-mail@v3
@@ -60,12 +75,14 @@ jobs:
           from: GitHub Actions
           body: |
             SonarCloud analysis completed successfully!
+            Quality Gate: ✅ PASSED
             
             Repository: ${{ github.repository }}
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
             Actor: ${{ github.actor }}
             Workflow: ${{ github.workflow }}
+            Quality Gate Status: ${{ steps.quality_gate.outputs.quality-gate-status }}
             
             View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
             View SonarCloud: https://sonarcloud.io/dashboard?id=neolisto_simple_python_parser
@@ -83,7 +100,8 @@ jobs:
           to: ${{ secrets.EMAIL_TO }}
           from: GitHub Actions
           body: |
-            SonarCloud analysis failed!
+            SonarCloud analysis or Quality Gate check failed!
+            Quality Gate: ❌ ${{ steps.quality_gate.outputs.quality-gate-status || 'UNKNOWN' }}
             
             Repository: ${{ github.repository }}
             Branch: ${{ github.ref_name }}
@@ -93,4 +111,7 @@ jobs:
             
             Please check the workflow run for details:
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            View SonarCloud for detailed analysis:
+            https://sonarcloud.io/dashboard?id=neolisto_simple_python_parser
 
