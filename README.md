@@ -1,4 +1,4 @@
-# Simple Python Parser
+# Simple Python Parser!
 
 <!-- Replace neolisto_simple_python_parser and neolisto with your actual SonarCloud/SonarQube values -->
 
